@@ -41,6 +41,8 @@ window.LOVE_CONTENT = {
     { src: 'photos/05.jpg', label: '第一次自拍', text: '这是你第一次发自己的自拍，四月底五月初的事情。那段时间我的情绪一直很低落，真的很感谢你。' },
     { src: 'photos/06.jpg', label: '五月出去玩', text: '这是你五一出去玩的时候发我的，我觉得好有活力。' },
     { src: 'photos/07.jpg', label: '水上乐园', text: '这是你当时去水上乐园的时候发我的，真的很好看。' },
+    { src: 'photos/08.jpg', label: '你送的礼物', text: '当我看到你送我的礼物时，我真的特别开心。' },
+    { src: 'photos/09.jpg', label: '那一刻', text: '我想那一刻，我真的特别喜欢你。' },
     { src: 'photos/01.mp4', type: 'video', label: '最喜欢的视频', text: '这个视频是我目前最喜欢的，真的好可爱，好好看。' },
   ],
 
