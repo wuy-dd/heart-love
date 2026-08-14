@@ -597,6 +597,23 @@
 
     storyInner.appendChild(frag);
     observeStory();
+
+    const settleFrames = setInterval(() => {
+      const frames = storyInner.querySelectorAll('.photo-frame.pending');
+      let dirty = false;
+      for (const frame of frames) {
+        const img = frame.querySelector('img');
+        const video = frame.querySelector('video');
+        const done = img
+          ? (img.complete && img.naturalWidth > 0)
+          : video && video.readyState >= 2;
+        if (done) {
+          frame.classList.remove('pending');
+          dirty = true;
+        }
+      }
+      if (!dirty || !storyInner.querySelector('.photo-frame.pending')) clearInterval(settleFrames);
+    }, 400);
   }
 
   function observeStory() {
