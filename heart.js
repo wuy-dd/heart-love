@@ -1139,15 +1139,4 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-
-  if (window.__LOVE_DEBUG) {
-    window.__loveState = () => ({
-      started,
-      phase,
-      secretLocked,
-      awaitingProposal,
-      proposalOpen,
-      keyBuf,
-    });
-  }
 })();
