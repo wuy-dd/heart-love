@@ -412,16 +412,27 @@
       align-items: center;
       justify-content: center;
       border: 1px dashed rgba(255, 159, 181, 0.45);
+      background:
+        linear-gradient(180deg, rgba(255, 159, 181, 0.10), rgba(255, 95, 126, 0.05)),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 12px, transparent 12px 24px);
     }
-    .photo-frame.pending img { display: none; }
     .photo-frame .placeholder {
-      display: none;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font: 400 15px/1.8 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
       color: rgba(255, 222, 230, 0.6);
       text-align: center;
       padding: 0 18px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
-    .photo-frame.pending .placeholder { display: block; }
+    .photo-frame.pending .placeholder {
+      opacity: 1;
+    }
     .photo-label {
       position: absolute;
       left: 12px;
