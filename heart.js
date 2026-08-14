@@ -1103,6 +1103,7 @@
     }
   });
 
+  envelopeEl.addEventListener('pointerup', openEnvelope);
   envelopeEl.addEventListener('click', openEnvelope);
   envelopeEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
