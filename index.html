@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>心跳</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #070313;
+    }
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+    #scene {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: 9%;
+      transform: translateX(-50%);
+      z-index: 8;
+      font: 400 15px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.72);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+    .hint.show {
+      opacity: 1;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 34px;
+      background: rgba(7, 3, 19, 0.42);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.9s ease;
+    }
+    .overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .ask {
+      margin: 0;
+      text-align: center;
+      font: 600 34px/1.4 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #fff0f3;
+      text-shadow: 0 0 26px rgba(255, 95, 126, 0.65), 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+    .buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      min-height: 76px;
+    }
+    .btn {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      border-radius: 999px;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    #yesBtn {
+      padding: 18px 52px;
+      font-size: 26px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ff5f7e, #ff8a5c);
+      box-shadow: 0 12px 36px rgba(255, 95, 126, 0.5);
+    }
+    #noBtn {
+      padding: 13px 36px;
+      font-size: 20px;
+      color: #ffd9e2;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 159, 181, 0.5);
+    }
+    .celebration {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+    .celebration.show {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .celebration h1 {
+      margin: 0;
+      font: 700 44px/1.3 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffd9a8;
+      text-shadow: 0 0 30px rgba(255, 209, 102, 0.75), 0 2px 12px rgba(0, 0, 0, 0.7);
+    }
+    .celebration p {
+      margin: 0;
+      font: 400 20px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffeef1;
+      text-shadow: 0 0 18px rgba(255, 95, 126, 0.55), 0 1px 8px rgba(0, 0, 0, 0.7);
+    }
+    .celebration .close-hint {
+      margin-top: 18px;
+      font: 400 15px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.6);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+    }
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(7, 3, 19, 0.6);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      opacity: 1;
+      transition: opacity 1.2s ease;
+      pointer-events: auto;
+    }
+    .intro.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .envelope-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+    .envelope {
+      position: relative;
+      width: min(460px, 86vw);
+      aspect-ratio: 320 / 210;
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      animation: envelopeFloat 3.4s ease-in-out infinite;
+    }
+    @keyframes envelopeFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .env-piece {
+      position: absolute;
+    }
+    .env-back {
+      inset: 0;
+      background: linear-gradient(160deg, #ff8fa5, #ff4f79);
+      border-radius: 14px;
+      box-shadow: 0 22px 60px rgba(255, 95, 126, 0.35);
+    }
+    .env-letter {
+      left: 8%;
+      right: 8%;
+      top: 14%;
+      bottom: 18%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #fff8f4;
+      border-radius: 8px;
+      transition: transform 0.9s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .letter-line {
+      font: 600 26px/1.4 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ff5f7e;
+    }
+    .letter-sub {
+      font: 400 14px/1.5 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #d9879a;
+    }
+    .letter-heart {
+      font-size: 26px;
+      color: #ff8a9c;
+    }
+    .env-front {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 60%;
+      background: linear-gradient(165deg, #ff6f8d, #ff4f79);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+    }
+    .env-flap {
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 52%;
+      background: linear-gradient(180deg, #ff9ab0, #ff6f8d);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .env-seal {
+      left: 50%;
+      top: 46%;
+      width: 64px;
+      height: 64px;
+      margin-left: -32px;
+      margin-top: -32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ffe3b8, #ff9a5c 70%);
+      color: #ffffff;
+      font-size: 28px;
+      box-shadow: 0 6px 18px rgba(255, 120, 80, 0.45);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .envelope.open .env-flap {
+      transform: rotateX(180deg);
+    }
+    .envelope.open .env-seal {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    .envelope.open .env-letter {
+      transform: translateY(-34px);
+    }
+    .envelope.burst {
+      opacity: 0;
+      transform: scale(0.7) translateY(-30px);
+      pointer-events: none;
+      animation: none;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .envelope-hint {
+      margin: 0;
+      font: 400 17px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.78);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+    }
+    .notes-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .note {
+      position: fixed;
+      padding: 12px;
+      border-radius: 6px;
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
+      font: 400 13px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", "PingFang SC", serif;
+      color: #5a3545;
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.2);
+      transition: transform 0.8s cubic-bezier(0.22, 1.3, 0.36, 1), opacity 0.55s ease;
+    }
+    .note.land {
+      opacity: 1;
+      transform: translate(0, 0) rotate(var(--rot)) scale(1);
+    }
+    .note.leave {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.15);
+      transition: transform 0.7s ease, opacity 0.6s ease;
+    }
+    .to-heart-btn {
+      position: fixed;
+      left: 50%;
+      bottom: 8%;
+      transform: translateX(-50%);
+      z-index: 3;
+      padding: 15px 42px;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font: 600 20px/1.2 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ff5f7e, #ff8a5c);
+      box-shadow: 0 12px 34px rgba(255, 95, 126, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease, transform 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .to-heart-btn.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ---------- 长信 + 照片流 ---------- */
+    .story {
+      position: fixed;
+      inset: 0;
+      z-index: 28;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+      background: linear-gradient(180deg, rgba(9, 4, 22, 0.94), rgba(20, 8, 26, 0.96));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+    .story.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .story-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 10vh 26px 16vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 26px;
+    }
+    .story-title {
+      margin: 0 0 6px;
+      font: 600 30px/1.5 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffd9e2;
+      text-shadow: 0 0 24px rgba(255, 95, 126, 0.45);
+      letter-spacing: 0;
+    }
+    .story p.para {
+      margin: 0;
+      width: 100%;
+      font: 400 18px/2 "KaiTi", "STKaiti", "Microsoft YaHei", "PingFang SC", serif;
+      color: #ffeef1;
+      text-indent: 2em;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .story .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .story-sign {
+      align-self: flex-end;
+      margin: 4px 0 10px;
+      font: 400 16px/1.8 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.72);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .photo-card {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 1.1s ease, transform 1.1s ease;
+    }
+    .photo-frame {
+      position: relative;
+      width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+    }
+    .photo-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+    .photo-frame.pending {
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(255, 159, 181, 0.45);
+    }
+    .photo-frame.pending img { display: none; }
+    .photo-frame .placeholder {
+      display: none;
+      font: 400 15px/1.8 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.6);
+      text-align: center;
+      padding: 0 18px;
+    }
+    .photo-frame.pending .placeholder { display: block; }
+    .photo-label {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      background: rgba(12, 5, 22, 0.6);
+      font: 400 13px/1.4 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffd9e2;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    .photo-text {
+      margin: 0;
+      font: 400 17px/1.9 "KaiTi", "STKaiti", "Microsoft YaHei", "PingFang SC", serif;
+      color: #ffeef1;
+    }
+    .story-btn {
+      margin-top: 18px;
+      padding: 15px 42px;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font: 600 19px/1.2 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ff5f7e, #ff8a5c);
+      box-shadow: 0 12px 34px rgba(255, 95, 126, 0.45);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .scroll-cue {
+      position: fixed;
+      left: 50%;
+      bottom: 4%;
+      transform: translateX(-50%);
+      z-index: 29;
+      font: 400 14px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: rgba(255, 222, 230, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      animation: cueFloat 2.4s ease-in-out infinite;
+    }
+    .scroll-cue.show { opacity: 1; }
+    @keyframes cueFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+    @media (max-width: 520px) {
+      .ask { font-size: 26px; }
+      #yesBtn { padding: 16px 44px; font-size: 22px; }
+      #noBtn { padding: 12px 30px; font-size: 17px; }
+      .buttons { gap: 18px; }
+      .celebration h1 { font-size: 34px; }
+      .celebration p { font-size: 17px; }
+      .hint { font-size: 14px; bottom: 7%; }
+      .celebration .close-hint { font-size: 14px; }
+      .envelope-hint { font-size: 14px; }
+      .to-heart-btn { padding: 14px 36px; font-size: 18px; }
+      .envelope { width: min(340px, 86vw); }
+      .letter-line { font-size: 20px; }
+      .letter-sub { font-size: 12px; }
+      .env-seal { width: 52px; height: 52px; margin-left: -26px; margin-top: -26px; font-size: 22px; }
+      .note { font-size: 12px; padding: 10px; }
+      .story-inner { padding: 8vh 18px 14vh; gap: 20px; }
+      .story-title { font-size: 24px; }
+      .story p.para { font-size: 16px; line-height: 1.95; }
+      .photo-text { font-size: 15px; }
+      .story-sign { font-size: 14px; }
+      .story-btn { padding: 14px 34px; font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 有些话，藏在心跳里。 -->
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div id="intro" class="intro" aria-hidden="false">
+    <div class="envelope-wrap">
+      <div id="envelope" class="envelope" role="button" tabindex="0" aria-label="打开信封">
+        <div class="env-piece env-back"></div>
+        <div class="env-piece env-letter">
+          <span class="letter-line">给 姐姐大人</span>
+          <span class="letter-sub">我有一肚子的话，想慢慢讲给你听</span>
+          <span class="letter-heart">♡</span>
+        </div>
+        <div class="env-piece env-front"></div>
+        <div class="env-piece env-flap"></div>
+        <div class="env-piece env-seal">❤</div>
+      </div>
+      <p class="envelope-hint">有一封信，轻轻点开</p>
+    </div>
+    <div id="notes-stage" class="notes-stage" aria-hidden="true"></div>
+    <button id="toHeartBtn" class="to-heart-btn" type="button">还有一颗心，想给你看</button>
+  </div>
+  <div id="story" class="story" aria-hidden="true">
+    <div id="story-inner" class="story-inner"></div>
+  </div>
+  <div id="scrollCue" class="scroll-cue">往下滑，还有话想说</div>
+  <div id="hint" class="hint">还有一句悄悄话，按住那颗心</div>
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <p class="ask">可以做我的女朋友吗？</p>
+    <div class="buttons">
+      <button id="yesBtn" class="btn" type="button">我愿意</button>
+      <button id="noBtn" class="btn" type="button">不愿意</button>
+    </div>
+  </div>
+  <div id="celebration" class="celebration" aria-hidden="true">
+    <h1>我也喜欢你</h1>
+    <p>以后的心跳，都分你一半</p>
+    <p class="close-hint">点一下，收下这份心跳</p>
+  </div>
+  <script src="content.js"></script>
+  <script src="heart.js"></script>
+</body>
+</html>
