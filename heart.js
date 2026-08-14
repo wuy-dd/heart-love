@@ -20,6 +20,12 @@
   const LETTER = CONTENT.letter || {};
   const PHOTOS = Array.isArray(CONTENT.photos) ? CONTENT.photos : [];
 
+  const ON_GITHUB_PAGES = location.hostname.endsWith('.github.io');
+  const mediaSrc = (src) => {
+    if (!ON_GITHUB_PAGES || !src || src.startsWith('http')) return src;
+    return 'https://cdn.jsdelivr.net/gh/wuy-dd/heart-love@main/' + src.replace(/^\.?\//, '');
+  };
+
   let W = 0;
   let H = 0;
   let DPR = 1;
@@ -552,7 +558,7 @@
         video.playsInline = true;
         video.controls = true;
         video.preload = 'auto';
-        video.src = item.src;
+        video.src = mediaSrc(item.src);
         video.addEventListener('loadeddata', () => frame.classList.remove('pending'));
         video.addEventListener('error', () => frame.classList.add('pending'));
         frame.appendChild(video);
@@ -562,7 +568,7 @@
         img.alt = '';
         img.addEventListener('load', () => frame.classList.remove('pending'));
         img.addEventListener('error', () => frame.classList.add('pending'));
-        if (item.src) img.src = item.src;
+        if (item.src) img.src = mediaSrc(item.src);
         frame.appendChild(img);
       }
 
@@ -641,7 +647,7 @@
       if (item && item.src && item.type !== 'video') {
         const warm = new Image();
         warm.decoding = 'async';
-        warm.src = item.src;
+        warm.src = mediaSrc(item.src);
       }
     }
     storyEl.scrollTop = 0;
