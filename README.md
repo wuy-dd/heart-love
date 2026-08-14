@@ -20,6 +20,38 @@ python server.py --share
 
 然后手机连同一个 WiFi，打开终端里显示的地址。
 
+正式使用已经部署到公网，所有网络都能打开：
+
+```text
+https://wuy-dd.github.io/heart-love/
+```
+
+## 更新内容并重新发布
+
+1. 照片放进 `photos/`，命名 `01.jpg`、`02.jpg`……
+2. 长信正文、照片配文、便利贴情话都在 `content.js` 里改。
+3. 本地预览：
+
+```bash
+python server.py
+```
+
+4. 生成新的公网二维码（可选）：
+
+```bash
+python qrcode_gen.py --url https://wuy-dd.github.io/heart-love/
+```
+
+5. 发布到 GitHub Pages：
+
+```bash
+git add -A
+git commit -m "update love page"
+git push origin main
+```
+
+等一两分钟，访问上面的公网地址即可看到最新内容。
+
 ## 秘密
 
 完整流程：
