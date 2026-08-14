@@ -28,7 +28,7 @@ https://wuy-dd.github.io/heart-love/
 
 ## 更新内容并重新发布
 
-1. 照片放进 `photos/`，命名 `01.jpg`、`02.jpg`……
+1. 照片放进 `photos/`，命名 `01.jpg`、`02.jpg`……；视频命名 `01.mp4`、`02.mp4`……
 2. 长信正文、照片配文、便利贴情话都在 `content.js` 里改。
 3. 本地预览：
 
