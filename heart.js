@@ -545,14 +545,26 @@
       const frame = document.createElement('div');
       frame.className = 'photo-frame pending';
 
-      const img = document.createElement('img');
-      img.loading = 'lazy';
-      img.decoding = 'async';
-      img.alt = '';
-      img.addEventListener('load', () => frame.classList.remove('pending'));
-      img.addEventListener('error', () => frame.classList.add('pending'));
-      if (item.src) img.src = item.src;
-      frame.appendChild(img);
+      if (item.type === 'video') {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.controls = true;
+        video.preload = 'metadata';
+        video.src = item.src;
+        video.addEventListener('loadeddata', () => frame.classList.remove('pending'));
+        video.addEventListener('error', () => frame.classList.add('pending'));
+        frame.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.decoding = 'async';
+        img.alt = '';
+        img.addEventListener('load', () => frame.classList.remove('pending'));
+        img.addEventListener('error', () => frame.classList.add('pending'));
+        if (item.src) img.src = item.src;
+        frame.appendChild(img);
+      }
 
       const ph = document.createElement('span');
       ph.className = 'placeholder';
