@@ -551,7 +551,7 @@
         video.loop = true;
         video.playsInline = true;
         video.controls = true;
-        video.preload = 'metadata';
+        video.preload = 'auto';
         video.src = item.src;
         video.addEventListener('loadeddata', () => frame.classList.remove('pending'));
         video.addEventListener('error', () => frame.classList.add('pending'));
@@ -637,6 +637,13 @@
     if (storyOpen) return;
     storyOpen = true;
     buildStory();
+    for (const item of PHOTOS) {
+      if (item && item.src && item.type !== 'video') {
+        const warm = new Image();
+        warm.decoding = 'async';
+        warm.src = item.src;
+      }
+    }
     storyEl.scrollTop = 0;
     storyEl.classList.add('show');
     storyEl.setAttribute('aria-hidden', 'false');
