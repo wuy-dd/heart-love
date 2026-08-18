@@ -605,6 +605,21 @@
     storyInner.appendChild(frag);
     observeStory();
 
+    const video = storyInner.querySelector('.photo-frame video');
+    if (video && 'IntersectionObserver' in window) {
+      const videoObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const p = video.play();
+            if (p && p.catch) p.catch(() => {});
+          } else {
+            video.pause();
+          }
+        }
+      }, { root: storyEl, threshold: 0.35 });
+      videoObserver.observe(video);
+    }
+
     const settleFrames = setInterval(() => {
       const frames = storyInner.querySelectorAll('.photo-frame.pending');
       let dirty = false;
