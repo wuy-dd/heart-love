@@ -689,6 +689,8 @@
   function closeStory() {
     if (!storyOpen) return;
     storyOpen = false;
+    const video = storyInner.querySelector('video');
+    if (video) video.pause();
     clearTimeout(cueTimer);
     scrollCueEl.classList.remove('show');
     storyEl.classList.remove('show');
@@ -701,6 +703,8 @@
   function resetStory() {
     storyOpen = false;
     videoUserControlled = false;
+    const video = storyInner.querySelector('video');
+    if (video) video.pause();
     clearTimeout(cueTimer);
     scrollCueEl.classList.remove('show');
     storyEl.classList.remove('show');
