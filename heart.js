@@ -9,6 +9,7 @@
   const yesBtn = document.getElementById('yesBtn');
   const noBtn = document.getElementById('noBtn');
   const celebrationEl = document.getElementById('celebration');
+  const artStageEl = document.getElementById('artStage');
   const introEl = document.getElementById('intro');
   const envelopeEl = document.getElementById('envelope');
   const notesStage = document.getElementById('notes-stage');
@@ -827,9 +828,12 @@
     overlayEl.setAttribute('aria-hidden', 'true');
     celebrationEl.classList.add('show');
     celebrationEl.setAttribute('aria-hidden', 'false');
+    celebrationEl.classList.remove('art-shown');
+    artStageEl.classList.remove('show');
+    const hint = celebrationEl.querySelector('.close-hint');
+    if (hint) hint.textContent = '点一下，还有一句话想对你说';
     celebrateAt = t;
     clearTimeout(celebrationTimer);
-    celebrationTimer = setTimeout(resetToIntro, 8000);
     playYesSound();
     if (navigator.vibrate) navigator.vibrate([40, 70, 50]);
     for (let i = 0; i < 110; i++) {
@@ -854,10 +858,26 @@
     celebrationEl.setAttribute('aria-hidden', 'true');
   }
 
+  function onCelebrationClick() {
+    if (!celebrationEl.classList.contains('show')) return;
+    if (!celebrationEl.classList.contains('art-shown')) {
+      celebrationEl.classList.add('art-shown');
+      artStageEl.classList.add('show');
+      const hint = celebrationEl.querySelector('.close-hint');
+      if (hint) hint.textContent = '点一下，收下我的心跳';
+    } else {
+      resetToIntro();
+    }
+  }
+
   function resetToIntro() {
     clearTimeout(celebrationTimer);
     clearTimeout(hintTimer);
     hideCelebration();
+    celebrationEl.classList.remove('art-shown');
+    artStageEl.classList.remove('show');
+    const hint = celebrationEl.querySelector('.close-hint');
+    if (hint) hint.textContent = '点一下，还有一句话想对你说';
     if (proposalOpen) {
       overlayEl.classList.remove('show');
       overlayEl.setAttribute('aria-hidden', 'true');
@@ -1157,7 +1177,7 @@
 
   yesBtn.addEventListener('click', onYesClick);
   noBtn.addEventListener('click', onNoClick);
-  celebrationEl.addEventListener('click', resetToIntro);
+  celebrationEl.addEventListener('click', onCelebrationClick);
 
   window.addEventListener('blur', () => {
     hold = null;
