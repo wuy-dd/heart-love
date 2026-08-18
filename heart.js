@@ -62,6 +62,7 @@
   let storyOpen = false;
   let storyObserver = null;
   let cueTimer = null;
+  let videoUserControlled = false;
 
   const MOVE_DUR = 2.1;
   const TEXT_DUR = 4.8;
@@ -560,6 +561,8 @@
         video.controls = true;
         video.preload = 'auto';
         video.src = mediaSrc(item.src);
+        video.addEventListener('click', () => { videoUserControlled = true; });
+        video.addEventListener('volumechange', () => { if (!video.muted) videoUserControlled = true; });
         video.addEventListener('loadeddata', () => frame.classList.remove('pending'));
         video.addEventListener('error', () => frame.classList.add('pending'));
         frame.appendChild(video);
@@ -610,8 +613,10 @@
       const videoObserver = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            const p = video.play();
-            if (p && p.catch) p.catch(() => {});
+            if (!videoUserControlled) {
+              const p = video.play();
+              if (p && p.catch) p.catch(() => {});
+            }
           } else {
             video.pause();
           }
@@ -695,6 +700,7 @@
 
   function resetStory() {
     storyOpen = false;
+    videoUserControlled = false;
     clearTimeout(cueTimer);
     scrollCueEl.classList.remove('show');
     storyEl.classList.remove('show');
