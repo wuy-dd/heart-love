@@ -26,6 +26,13 @@
     if (!ON_GITHUB_PAGES || !src || src.startsWith('http')) return src;
     return 'https://cdn.jsdelivr.net/gh/wuy-dd/heart-love@main/' + src.replace(/^\.?\//, '');
   };
+  const mediaCandidates = (src) => {
+    const list = [mediaSrc(src)];
+    if (ON_GITHUB_PAGES && src && !src.startsWith('http')) {
+      list.push(location.origin + location.pathname.replace(/\/+$/, '') + '/' + src.replace(/^\.?\//, ''));
+    }
+    return list;
+  };
 
   let W = 0;
   let H = 0;
@@ -471,6 +478,7 @@
   function triggerSecret() {
     if (!started || phase !== 'heart' || secretLocked) return;
     secretLocked = true;
+    hideHint();
     buildTextTargets();
     phase = 'glow';
     phaseT = 0;
@@ -497,6 +505,7 @@
   }
 
   function showHint() {
+    hintEl.textContent = awaitingProposal ? '还有一句悄悄话，按住那颗心' : '长按这颗心，有句话想对你说';
     hintEl.classList.add('show');
     clearTimeout(hintTimer);
     hintTimer = setTimeout(() => hintEl.classList.remove('show'), 4000);
@@ -555,12 +564,21 @@
 
       if (item.type === 'video') {
         const video = document.createElement('video');
+        const candidates = mediaCandidates(item.src);
+        let mediaIndex = 0;
         video.muted = true;
         video.loop = true;
         video.playsInline = true;
         video.controls = true;
         video.preload = 'auto';
-        video.src = mediaSrc(item.src);
+        video.src = candidates[mediaIndex];
+        video.addEventListener('error', () => {
+          if (mediaIndex < candidates.length - 1) {
+            mediaIndex++;
+            video.src = candidates[mediaIndex];
+            video.load();
+          }
+        });
         video.addEventListener('click', () => { videoUserControlled = true; });
         video.addEventListener('volumechange', () => { if (!video.muted) videoUserControlled = true; });
         video.addEventListener('loadeddata', () => frame.classList.remove('pending'));
@@ -568,11 +586,20 @@
         frame.appendChild(video);
       } else {
         const img = document.createElement('img');
+        const candidates = mediaCandidates(item.src);
+        let mediaIndex = 0;
         img.decoding = 'async';
         img.alt = '';
         img.addEventListener('load', () => frame.classList.remove('pending'));
-        img.addEventListener('error', () => frame.classList.add('pending'));
-        if (item.src) img.src = mediaSrc(item.src);
+        img.addEventListener('error', () => {
+          if (mediaIndex < candidates.length - 1) {
+            mediaIndex++;
+            img.src = candidates[mediaIndex];
+          } else {
+            frame.classList.add('pending');
+          }
+        });
+        if (item.src) img.src = candidates[mediaIndex];
         frame.appendChild(img);
       }
 
@@ -668,7 +695,7 @@
       if (item && item.src && item.type !== 'video') {
         const warm = new Image();
         warm.decoding = 'async';
-        warm.src = mediaSrc(item.src);
+        warm.src = mediaCandidates(item.src)[0];
       }
     }
     storyEl.scrollTop = 0;
@@ -791,6 +818,9 @@
     if (started) return;
     started = true;
     toHeartBtn.classList.remove('show');
+    hintEl.textContent = '长按这颗心，有句话想对你说';
+    hintEl.classList.add('show');
+    clearTimeout(hintTimer);
     const notes = notesStage.querySelectorAll('.note');
     for (const note of notes) {
       note.style.transitionDelay = '0s';
@@ -898,6 +928,8 @@
   function resetToIntro() {
     clearTimeout(celebrationTimer);
     clearTimeout(hintTimer);
+    hintEl.classList.remove('show');
+    hintEl.textContent = '长按这颗心，有句话想对你说';
     hideCelebration();
     celebrationEl.classList.remove('art-shown');
     artStageEl.classList.remove('show');
