@@ -131,7 +131,12 @@
       color: transparent;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 0 24px rgba(255, 120, 150, 0.55)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5));
-      animation: artShine 4.5s linear infinite, artPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation: artShine 4.5s linear 0.9s infinite, artPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
+    }
+    .celebration p.old-end {
+      font: 700 30px/1.4 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
+      color: #ffd9a8;
+      text-shadow: 0 0 24px rgba(255, 209, 102, 0.65), 0 2px 10px rgba(0, 0, 0, 0.7);
     }
     .celebration p {
       margin: 0;
@@ -143,7 +148,7 @@
       font: 600 22px/1.6 "KaiTi", "STKaiti", "Microsoft YaHei", serif;
       color: #ffe0e8;
       text-shadow: 0 0 22px rgba(255, 95, 126, 0.7), 0 2px 10px rgba(0, 0, 0, 0.6);
-      animation: artPop 0.8s 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation: artPop 0.8s 1.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
     @keyframes artShine {
       0% { background-position: 0% 50%; }
@@ -516,6 +521,7 @@
       #noBtn { padding: 12px 30px; font-size: 17px; }
       .buttons { gap: 18px; }
       .celebration h1 { font-size: clamp(24px, 8vw, 34px); }
+      .celebration p.old-end { font-size: 24px; }
       .celebration p { font-size: 17px; }
       .celebration p.promise { font-size: 19px; }
       .hint { font-size: 14px; bottom: 7%; }
@@ -570,6 +576,8 @@
     </div>
   </div>
   <div id="celebration" class="celebration" aria-hidden="true">
+    <p class="old-end">我也喜欢你</p>
+    <p>以后的心跳，都分你一半</p>
     <h1>孙晓阳，我喜欢你！！！</h1>
     <p class="promise">我一定会对你好的，</p>
     <p class="close-hint">点一下，把我的心跳收好</p>
